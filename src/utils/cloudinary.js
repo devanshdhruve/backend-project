@@ -9,7 +9,7 @@ cloudinary.config({
 
 const uploadOnCloudinary = async (localFilePath) => {
   try {
-    if (!localPathName) return null;
+    if (!localFilePath) return null;
     //upload the file on Cloudinary
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",

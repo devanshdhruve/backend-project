@@ -52,7 +52,7 @@ const userSchema = new Schema(
 userSchema.pre("save", async function (next) {
   //using middleware to encrypt & async cause it takes time to compute
   if (!this.isModified("password")) return next(); //encryption will be done if password field is changed else no encryption, even though any changes done by user
-  this.password = bcrypt.hash(this.password, 10);
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
