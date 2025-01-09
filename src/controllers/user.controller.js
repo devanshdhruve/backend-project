@@ -5,7 +5,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import jwt from "jsonwebtoken";
 
-const generateAccessAndRefereshTokens = async (userId) => {
+const generateAccessAndRefreshTokens = async (userId) => {
   try {
     const user = await User.findById(userId);
     const accessToken = user.generateAccessToken();
@@ -126,7 +126,7 @@ const loginUser = asyncHandler(async (req, res) => {
     throw new ApiError(401, "Invalid user credentials");
   }
 
-  const { accessToken, refreshToken } = await generateAccessAndRefereshTokens(
+  const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(
     user._id
   );
 
@@ -161,8 +161,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1,
       },
     },
     {
@@ -188,7 +188,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     req.cookies.refreshToken || req.body.refreshToken;
 
   if (!incomingRefreshToken) {
-    throw new ApiError(401, "Unauthorized request");
+    throw new ApiError(401, "unauthorized request");
   }
 
   try {
@@ -213,7 +213,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     };
 
     const { accessToken, newRefreshToken } =
-      await generateAccessAndRefereshTokens(user._id);
+      await generateAccessAndRefreshTokens(user._id);
 
     return res
       .status(200)
@@ -222,7 +222,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
       .json(
         new ApiResponse(
           200,
-          { accessToken, refreshToken },
+          { accessToken, refreshToken: newRefreshToken },
           "Access token refreshed"
         )
       );
